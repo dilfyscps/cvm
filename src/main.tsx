@@ -4,7 +4,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import App from "./App";
 import Packs from "./packs";
+import Gifs from "./Gifs";
 import Requests from "./requests";
+import FvgifyTerms from "./FvgifyTerms";
+import PrivacyPolicy from "./PrivacyPolicy";
 
 import "./index.css";
 
@@ -14,7 +17,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/packs" element={<Packs />} />
+        <Route path="/gifs" element={<Gifs />} />
         <Route path="/requests" element={<Requests />} />
+        <Route path="/fvgify-terms-of-service" element={<FvgifyTerms />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

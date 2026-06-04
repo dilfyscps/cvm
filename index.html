@@ -4,10 +4,52 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="src/img/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>cvm</title>
+
+    <!-- Open Graph Meta Tags for Discord Preview -->
+    <meta property="og:title" content="CVMSCPS - GIF Packs" />
+    <meta property="og:description" content="Fresh NSFW GIF pack from boystobreed for discord.gg/fvgnation and outside sharing." />
+    <meta property="og:image" content="https://cvmscps.com/gif-previews/boystobreed-fucking1.gif" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cvmscps.com/gifs" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CVMSCPS - GIF Packs" />
+    <meta name="twitter:description" content="Fresh NSFW GIF pack from boystobreed for discord.gg/fvgnation and outside sharing." />
+    <meta name="twitter:image" content="https://cvmscps.com/gif-previews/boystobreed-fucking1.gif" />
+
+    <title>CVMSCPS</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      function updateMetaTags() {
+        const hash = window.location.hash.slice(1);
+        const packId = hash || 'boystobreed';
+        
+        // Map pack IDs to their metadata
+        const packMeta = {
+          boystobreed: {
+            title: 'boystobreed - CVMSCPS GIF Pack',
+            description: 'Fresh NSFW GIF pack from boystobreed for discord.gg/fvgnation and outside sharing.',
+            image: '/gif-previews/boystobreed-fucking1.gif'
+          }
+        };
+        
+        const meta = packMeta[packId] || packMeta.boystobreed;
+        
+        // Update OG meta tags
+        document.querySelector('meta[property="og:title"]').setAttribute('content', meta.title);
+        document.querySelector('meta[property="og:description"]').setAttribute('content', meta.description);
+        document.querySelector('meta[property="og:image"]').setAttribute('content', window.location.origin + meta.image);
+        
+        // Update Twitter meta tags
+        document.querySelector('meta[name="twitter:title"]').setAttribute('content', meta.title);
+        document.querySelector('meta[name="twitter:description"]').setAttribute('content', meta.description);
+        document.querySelector('meta[name="twitter:image"]').setAttribute('content', window.location.origin + meta.image);
+      }
+      
+      updateMetaTags();
+      window.addEventListener('hashchange', updateMetaTags);
+    </script>
   </body>
 </html>

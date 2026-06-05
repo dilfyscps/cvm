@@ -3,29 +3,88 @@ import { useEffect, useMemo, useState } from "react";
 const gifPacks = [
   {
     id: "boystobreed",
-    title: "boystobreed",
+    title: "BOYSTOBREED GIF PACK",
     tag: "NSFW",
-    img: "/gif-previews/boystobreed-fucking1.gif",
+    previews: [
+      "/gif-previews/boystobreed1.gif",
+      "/gif-previews/boystobreed6.gif",
+      "/gif-previews/boystobreed9.gif",
+    ],
     download: "https://cvmscpgif.b-cdn.net/boystobreed.zip",
-    description: "NSFW GIF pack of boystobreed, discord.gg/fvgnation & discord.gg/cvmscp",
-    files: "10 GIFs & More Soon",
+    description: "10 high-quality GIFs of boystobreed cock.",
+    files: "10 GIFs",
     creator: "boystobreed",
     socialUrl: "https://twitter.com/boystobreed",
     socialLabel: "Twitter",
   },
   {
-    id: "pupderix",
-    title: "pupderix",
+    id: "pupderix1",
+    title: "PUPDERIX GIF PACK",
     tag: "NSFW",
-    img: "/gif-previews/pupderix-ghost3.gif",
+    previews: [
+      "/gif-previews/pupderix ghost1.gif",
+      "/gif-previews/pupderix ghost11.gif",
+      "/gif-previews/pupderix ghost16.gif",
+    ],
     download: "https://cvmscpgif.b-cdn.net/pupderix.zip",
-    description: "NSFW GIF pack of pupderix, discord.gg/fvgnation & discord.gg/cvmscp",
-    files: "8 GIFs & More Soon",
+    description: "16 Call of Duty themed GIFs featuring pupderix.",
+    files: "16 GIFs",
+    creator: "pupderix",
+    socialUrl: "https://twitter.com/pupderix",
+    socialLabel: "Twitter",
+  },
+  {
+    id: "pupderix2",
+    title: "PUPDERIX GIF PACK 2",
+    tag: "NSFW",
+    previews: [
+      "/gif-previews/pupderix camo2.gif",
+      "/gif-previews/pupderix camo3.gif",
+      "/gif-previews/pupderix camo4.gif",
+    ],
+    download: "https://cvmscpgif.b-cdn.net/pupderix%20camo.zip",
+    description: "5 Call of Duty themed GIFs featuring pupderix in camo.",
+    files: "5 GIFs",
     creator: "pupderix",
     socialUrl: "https://twitter.com/pupderix",
     socialLabel: "Twitter",
   },
 ];
+
+function RotatingPreview({ previews, title }: { previews: string[]; title: string }) {
+  const [index, setIndex] = useState(0);
+  const [, setLoops] = useState(0);
+
+  useEffect(() => {
+    if (previews.length <= 1) return;
+
+    const interval = window.setInterval(() => {
+      setLoops((currentLoops) => {
+        if (currentLoops < 1) {
+          return currentLoops + 1;
+        }
+        setIndex((currentIndex) => (currentIndex + 1) % previews.length);
+        return 0;
+      });
+    }, 2500);
+
+    return () => window.clearInterval(interval);
+  }, [previews]);
+
+  return (
+    <div className="relative h-full w-full overflow-hidden">
+      <img
+        key={previews[index]}
+        src={previews[index]}
+        alt={title}
+        className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
+        style={{
+          animation: "fadeIn 0.6s ease"
+        }}
+      />
+    </div>
+  );
+}
 
 export default function Gifs() {
   const [highlightedPack, setHighlightedPack] = useState<string | null>(null);
@@ -153,10 +212,9 @@ export default function Gifs() {
             }`}
           >
             <div className="relative overflow-hidden bg-black/40 aspect-square">
-              <img
-                src={pack.img}
-                alt={pack.title}
-                className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-110"
+              <RotatingPreview
+                previews={pack.previews}
+                title={pack.title}
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent px-4 py-4">
                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -192,7 +250,9 @@ export default function Gifs() {
                     </button>
                   </div>
                 </div>
-                <p className="hidden">{pack.description}</p>
+                <p className="text-sm leading-6 text-white/60 line-clamp-2">
+                  {pack.description}
+                </p>
               </div>
 
     
@@ -217,6 +277,12 @@ export default function Gifs() {
 
   return (
     <main className="min-h-screen bg-[#05060b] text-white">
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,.15),transparent_50%),radial-gradient(ellipse_60%_60%_at_20%_50%,rgba(59,130,246,.1),transparent_60%),radial-gradient(ellipse_40%_40%_at_80%_80%,rgba(168,85,247,.05),transparent_50%),linear-gradient(to_bottom,#05060b,#02040c)]" />
 
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-2xl">
@@ -282,12 +348,12 @@ export default function Gifs() {
                 <p className="text-sm uppercase tracking-[0.35em] text-pink-200/70">
                   Latest drop
                 </p>
-                <h2 className="mt-4 text-3xl font-black text-white">boystobreed</h2>
+                <h2 className="mt-4 text-3xl font-black text-white">pupderix</h2>
                 <p className="mt-3 text-sm leading-7 text-white/60">
                   Fresh NSFW content ready for instant download and seamless sharing.
                 </p>
                 <button
-                  onClick={() => goToPack("boystobreed")}
+                  onClick={() => goToPack("pupderix")}
                   className="mt-6 inline-flex rounded-2xl border border-pink-300/30 bg-pink-300/10 px-5 py-3 text-sm font-bold text-pink-200 transition hover:bg-pink-300/20 hover:border-pink-300/50 hover:shadow-lg hover:shadow-pink-500/15"
                 >
                   Go to pack

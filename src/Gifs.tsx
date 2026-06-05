@@ -53,34 +53,38 @@ const gifPacks = [
 
 function RotatingPreview({ previews, title }: { previews: string[]; title: string }) {
   const [index, setIndex] = useState(0);
-  const [, setLoops] = useState(0);
+  const [visible, setVisible] = useState(0);
 
   useEffect(() => {
     if (previews.length <= 1) return;
 
     const interval = window.setInterval(() => {
-      setLoops((currentLoops) => {
-        if (currentLoops < 1) {
-          return currentLoops + 1;
-        }
-        setIndex((currentIndex) => (currentIndex + 1) % previews.length);
-        return 0;
-      });
-    }, 2500);
+      setVisible((v) => (v === 0 ? 1 : 0));
+
+      window.setTimeout(() => {
+        setIndex((current) => (current + 1) % previews.length);
+      }, 300);
+    }, 5000);
 
     return () => window.clearInterval(interval);
   }, [previews]);
 
+  const nextIndex = (index + 1) % previews.length;
+
   return (
     <div className="relative h-full w-full overflow-hidden">
       <img
-        key={previews[index]}
         src={previews[index]}
         alt={title}
-        className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
-        style={{
-          animation: "fadeIn 0.6s ease"
-        }}
+        className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-110 transition-all duration-700"
+        style={{ opacity: visible === 0 ? 1 : 0 }}
+      />
+
+      <img
+        src={previews[nextIndex]}
+        alt={title}
+        className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-110 transition-all duration-700"
+        style={{ opacity: visible === 0 ? 0 : 1 }}
       />
     </div>
   );

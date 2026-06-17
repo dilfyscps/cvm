@@ -1,45 +1,19 @@
+import PageBackground from "./components/PageBackground";
+import SiteFooter from "./components/SiteFooter";
+import SiteHeader from "./components/SiteHeader";
+
 export default function PrivacyPolicy() {
   return (
-    <main className="min-h-screen bg-[#05060b] text-white">
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,.15),transparent_50%),radial-gradient(ellipse_60%_60%_at_20%_50%,rgba(59,130,246,.1),transparent_60%),radial-gradient(ellipse_40%_40%_at_80%_80%,rgba(168,85,247,.05),transparent_50%),linear-gradient(to_bottom,#05060b,#02040c)]" />
+    <div className="page-shell page-enter text-white">
+      <PageBackground />
+      <SiteHeader />
 
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-2xl">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-6">
-          <a
-            href="/"
-            className="rounded-full border border-white/10 bg-white/5 px-5 py-2 font-black text-pink-200 shadow-lg"
-          >
-            CVMSCPS
-          </a>
-
-          <nav className="hidden rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white/60 md:flex gap-8">
-            <a className="hover:text-white" href="/">
-              Home
-            </a>
-
-            <a className="hover:text-white" href="/packs">
-              Scenepacks
-            </a>
-
-            <a className="hover:text-white" href="/requests">
-              Requests
-            </a>
-
-            <a className="text-pink-200" href="/privacy-policy">
-              Privacy Policy
-            </a>
-          </nav>
-        </div>
-      </header>
-
-      <section className="mx-auto max-w-5xl px-6 py-20">
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-10 shadow-2xl shadow-pink-500/15 backdrop-blur-xl">
-          <div className="mb-10">
-            <p className="text-sm uppercase tracking-[0.3em] text-pink-300">Discord Bot</p>
-            <h1 className="mt-4 text-5xl font-black tracking-tight text-white">
-              Privacy Policy
-            </h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-white/70">
+      <section className="container-app py-16 sm:py-20">
+        <div className="glass-card mx-auto max-w-3xl p-8 sm:p-10">
+          <div className="glass-content">
+            <p className="text-label">Discord Bot</p>
+            <h1 className="text-display mt-3 text-3xl sm:text-4xl">Privacy Policy</h1>
+            <p className="text-body mt-4 leading-relaxed">
               This privacy policy explains how the FVGnation Discord bot collects, uses, and protects information from users interacting with the bot.
             </p>
           </div>
@@ -89,6 +63,8 @@ export default function PrivacyPolicy() {
           </div>
         </div>
       </section>
-    </main>
+
+      <SiteFooter />
+    </div>
   );
 }

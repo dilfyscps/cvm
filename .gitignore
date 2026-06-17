@@ -29,3 +29,6 @@ dist-ssr
 !.dev.vars.example
 .env*
 !.env.example
+public/pack-meta.json
+public/og/
+worker/supabase-config.ts

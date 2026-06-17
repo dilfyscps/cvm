@@ -1,96 +1,190 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import PageBackground from "./components/PageBackground";
+import SiteFooter from "./components/SiteFooter";
+import SiteHeader from "./components/SiteHeader";
+
+const COOLDOWN_KEY = "cvm_request_cooldown_until";
+const MIN_LENGTH = 10;
+const MAX_LENGTH = 500;
+
+function getCooldownRemaining() {
+  const until = Number(localStorage.getItem(COOLDOWN_KEY) ?? 0);
+  return Math.max(0, until - Date.now());
+}
+
+function formatWait(ms: number) {
+  const minutes = Math.ceil(ms / 60_000);
+  return minutes <= 1 ? "1 minute" : `${minutes} minutes`;
+}
 
 export default function Requests() {
   const [request, setRequest] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+  const [sending, setSending] = useState(false);
+  const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [cooldownMs, setCooldownMs] = useState(() => getCooldownRemaining());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setCooldownMs(getCooldownRemaining());
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   async function sendRequest() {
-    if (!request.trim()) {
-      alert("Please enter a request.");
+    setStatus(null);
+
+    const trimmed = request.trim();
+    if (!trimmed) {
+      setStatus({ type: "error", message: "Please enter a request." });
+      return;
+    }
+    if (trimmed.length < MIN_LENGTH) {
+      setStatus({ type: "error", message: `Please enter at least ${MIN_LENGTH} characters.` });
+      return;
+    }
+    if (trimmed.length > MAX_LENGTH) {
+      setStatus({ type: "error", message: `Keep your request under ${MAX_LENGTH} characters.` });
+      return;
+    }
+    if (cooldownMs > 0) {
+      setStatus({
+        type: "error",
+        message: `Please wait ${formatWait(cooldownMs)} before submitting again.`,
+      });
       return;
     }
 
+    setSending(true);
+
     try {
-      await fetch("https://discord.com/api/webhooks/1508531753780777101/YvqckD5P6iJadempHwmNqJgcfveuhJ0wHs6dt41sP-unEfgb7qbXXNEqkbBmHZU5211k", {
+      const res = await fetch("/api/request", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          embeds: [
-            {
-              title: "📦 New Scenepack Request",
-              description: request,
-              color: 16761035,
-            },
-          ],
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: trimmed, honeypot }),
       });
 
-      alert("Request submitted!");
+      const data = (await res.json()) as {
+        error?: string;
+        success?: boolean;
+        retryAfter?: number;
+      };
+
+      if (res.status === 429) {
+        const waitMs = (data.retryAfter ?? 600) * 1000;
+        localStorage.setItem(COOLDOWN_KEY, String(Date.now() + waitMs));
+        setCooldownMs(waitMs);
+        setStatus({
+          type: "error",
+          message: data.error ?? `Please wait ${formatWait(waitMs)} before submitting again.`,
+        });
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error ?? "Request failed");
+      }
+
+      const waitMs = (data.retryAfter ?? 600) * 1000;
+      localStorage.setItem(COOLDOWN_KEY, String(Date.now() + waitMs));
+      setCooldownMs(waitMs);
       setRequest("");
-    } catch (err) {
-      alert("Failed to send request.");
+      setStatus({ type: "success", message: "Request submitted! We'll review it on Discord." });
+    } catch (error) {
+      setStatus({
+        type: "error",
+        message: error instanceof Error ? error.message : "Failed to send request.",
+      });
+    } finally {
+      setSending(false);
     }
   }
 
+  const disabled = sending || cooldownMs > 0;
+  const charsLeft = MAX_LENGTH - request.length;
+
   return (
-    <main className="min-h-screen bg-[#05060b] text-white">
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(236,72,153,.15),transparent_50%),radial-gradient(ellipse_60%_60%_at_20%_50%,rgba(59,130,246,.1),transparent_60%),radial-gradient(ellipse_40%_40%_at_80%_80%,rgba(168,85,247,.05),transparent_50%),linear-gradient(to_bottom,#05060b,#02040c)]" />
+    <div className="page-shell page-enter text-white">
+      <PageBackground />
+      <SiteHeader active="/requests" />
 
-      {/* NAV */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-2xl">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-6">
-          <a
-            href="/"
-            className="rounded-full border border-white/10 bg-white/5 px-5 py-2 font-black text-pink-200 shadow-lg"
-          >
-            CVMSCPS
-          </a>
-
-          <nav className="hidden rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white/60 md:flex gap-8">
-            <a className="hover:text-white" href="/">
-              Home
-            </a>
-
-            <a className="hover:text-white" href="/packs">
-              Scenepacks
-            </a>
-
-            <a className="text-pink-200" href="/requests">
+      <section className="container-app flex min-h-[75vh] items-center justify-center py-16">
+        <div className="glass-card w-full max-w-xl p-8 sm:p-10">
+          <div className="glass-content">
+            <span className="liquid-badge">
+              <span className="liquid-badge__dot" />
               Requests
-            </a>
-          </nav>
-        </div>
-      </header>
+            </span>
+            <h1 className="text-display mt-4 text-3xl text-white sm:text-4xl">Request a scenepack</h1>
+            <p className="text-body mt-3">
+              One request every 10 minutes. Be specific so we know what you want.
+            </p>
 
-      {/* CONTENT */}
-      <section className="flex min-h-[80vh] items-center justify-center px-6">
-        <div className="w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-pink-500/15 backdrop-blur-xl">
+            <label className="sr-only" htmlFor="request-honeypot">
+              Leave blank
+            </label>
+            <input
+              id="request-honeypot"
+              type="text"
+              name="website"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              className="request-honeypot"
+              aria-hidden="true"
+            />
 
-          <h1 className="text-5xl font-black">
-            Request a Scenepack
-          </h1>
+            <textarea
+              value={request}
+              onChange={(e) => setRequest(e.target.value.slice(0, MAX_LENGTH))}
+              placeholder="Example: arianfzn gym scenepack..."
+              className="admin-form-textarea mt-8 min-h-[10rem]"
+              maxLength={MAX_LENGTH}
+              disabled={disabled}
+            />
 
-          <p className="mt-4 text-white/60">
-            Submit scenepack requests directly to our Discord server.
-          </p>
+            <p className={`text-caption mt-2 ${charsLeft < 40 ? "text-pink-300" : ""}`}>
+              {request.trim().length}/{MIN_LENGTH} min · {charsLeft} left
+            </p>
 
-          <textarea
-            value={request}
-            onChange={(e) => setRequest(e.target.value)}
-            placeholder="Example: arianfzn gym scenepack..."
-            className="mt-8 h-40 w-full rounded-2xl border border-white/10 bg-[#0a0d1a] p-5 text-white outline-none placeholder:text-white/20 focus:border-pink-300 focus:shadow-lg focus:shadow-pink-500/20 transition"
-          />
+            {status && (
+              <p
+                className={`mt-4 rounded-xl px-4 py-3 text-sm ${
+                  status.type === "success"
+                    ? "border border-emerald-400/25 bg-emerald-400/10 text-emerald-100"
+                    : "border border-red-400/25 bg-red-400/10 text-red-100"
+                }`}
+                role="status"
+              >
+                {status.message}
+              </p>
+            )}
 
-          <button
-            onClick={sendRequest}
-            className="mt-6 rounded-2xl bg-pink-200 px-8 py-4 font-bold text-black shadow-[0_0_40px_rgba(255,192,203,.35)] hover:bg-pink-100 hover:shadow-[0_0_50px_rgba(255,192,203,.45)] transition"
-          >
-            Submit Request
-          </button>
+            {cooldownMs > 0 && !status && (
+              <p className="text-caption mt-4">
+                You can submit again in {formatWait(cooldownMs)}.
+              </p>
+            )}
 
+            <button
+              type="button"
+              onClick={sendRequest}
+              disabled={disabled}
+              className="btn-primary mt-6 w-full"
+            >
+              {sending
+                ? "Sending..."
+                : cooldownMs > 0
+                  ? `Wait ${formatWait(cooldownMs)}`
+                  : "Submit request"}
+            </button>
+          </div>
         </div>
       </section>
-    </main>
+
+      <SiteFooter />
+    </div>
   );
 }
